@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy.orm import relationship
 from db.connection import Base
 
 class User(Base):
@@ -9,3 +10,6 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     password_hash = Column(String, nullable=False)
     is_admin = Column(Boolean, default=False)
+
+    # ✅ Workspace ilişki satırı
+    workspaces = relationship("Workspace", back_populates="owner")
