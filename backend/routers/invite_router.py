@@ -5,11 +5,7 @@ from models.invite import Invite
 from schemas.invite_schema import InviteRequest
 import uuid
 
-# 📩 Mail fonksiyonunu import ediyoruz
-from core.mail import send_invite_email
-
 router = APIRouter(prefix="/invite", tags=["Invite"])
-
 
 # --- 📩 1) Davet Gönder ---
 @router.post("/send")
@@ -27,19 +23,13 @@ def send_invite(request: InviteRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(invite)
 
-    # --- 📬 Davet Linki ---
-    invite_url = f"http://localhost:5173/accept-invite/{token}"
-
-    # --- 📧 Mail gerçekten burada gönderiliyor ---
-    send_invite_email(request.email, invite_url)
-
     return {
         "message": "Invite sent!",
-        "invite_url": invite_url
+        "invite_url": f"http://localhost:5173/accept-invite/{token}"
     }
 
 
-# --- ✔ 2) Daveti Kontrol Et / Kabul Et ---
+# --- ✔ 2) Daveti Kabul Et ---
 @router.get("/accept/{token}")
 def accept_invite(token: str, db: Session = Depends(get_db)):
     invite = db.query(Invite).filter(Invite.token == token).first()
@@ -47,8 +37,4 @@ def accept_invite(token: str, db: Session = Depends(get_db)):
     if not invite:
         raise HTTPException(status_code=400, detail="Geçersiz veya süresi dolmuş davet.")
 
-    return {
-        "email": invite.email,
-        "workspace_id": invite.workspace_id,
-        "accepted": invite.accepted
-    }
+    return {"message": "Bu davet daha önce kabul edilmiş.", "workspace_id": invite.workspace_id}

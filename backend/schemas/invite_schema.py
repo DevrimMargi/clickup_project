@@ -1,5 +1,5 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
-class InviteSchema(BaseModel):
+class InviteRequest(BaseModel):
+    email: EmailStr
     workspace_id: int
-    email: str

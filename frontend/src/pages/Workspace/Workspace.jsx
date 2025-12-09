@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import Sidebar from "./components/Sidebar";
@@ -13,35 +13,50 @@ export default function Workspace() {
 
   const [openInvite, setOpenInvite] = useState(false);
 
+  // ✔ Token yoksa kullanıcıyı login sayfasına at
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+    }
+  }, [navigate]);
+
+  // ✔ Çıkış işlemi
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login");
   };
 
+  // workspaceId number’a çevrildi (güvenli kullanım)
+  const wsId = Number(workspaceId);
+
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-[#0f172a] to-[#020617] text-white">
 
       {/* SIDEBAR */}
-      <Sidebar handleLogout={handleLogout} setOpenInvite={setOpenInvite} />
+      <Sidebar 
+        handleLogout={handleLogout} 
+        setOpenInvite={setOpenInvite} 
+      />
 
-      {/* ANA İÇERİK */}
+      {/* MAIN CONTENT */}
       <main className="flex-1 p-10">
 
-        {/* ÜST BAR */}
-        <TopBar workspaceId={workspaceId} />
+        {/* TOP BAR */}
+        <TopBar workspaceId={wsId} />
 
-        {/* ÜST BİLGİLER */}
+        {/* STATS SECTION */}
         <StatsCards />
 
-        {/* HIZLI AKSİYONLAR */}
+        {/* QUICK ACTIONS */}
         <QuickActions setOpenInvite={setOpenInvite} />
 
       </main>
 
-      {/* MODAL */}
+      {/* INVITE MODAL */}
       {openInvite && (
         <InviteModal
-          workspaceId={workspaceId}
+          workspaceId={wsId}   // ✔ her zaman number
           closeModal={() => setOpenInvite(false)}
         />
       )}

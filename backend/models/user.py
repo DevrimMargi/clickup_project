@@ -11,5 +11,8 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     is_admin = Column(Boolean, default=False)
 
-    # ✅ Workspace ilişki satırı
-    workspaces = relationship("Workspace", back_populates="owner")
+    # Kullanıcının sahibi olduğu workspace'ler
+    owned_workspaces = relationship("Workspace", back_populates="owner")
+
+    # Kullanıcının üye olduğu workspace'ler
+    memberships = relationship("UserWorkspace", back_populates="user")

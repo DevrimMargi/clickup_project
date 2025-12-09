@@ -1,9 +1,13 @@
 import { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export default function Signup() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+
+  // Davetten geldiyse workspace_id burada olur:
+  const invitedWorkspaceId = params.get("workspace_id");
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -19,6 +23,7 @@ export default function Signup() {
     }
 
     try {
+      // 1) Signup isteği
       const response = await axios.post(
         "http://localhost:8000/auth/signup",
         {
@@ -35,15 +40,33 @@ export default function Signup() {
 
       alert(response.data.message || "Kayıt başarılı!");
 
-      // Backend'in döndürdüğü token ve workspace id'yi al
+      // Backend'den gelen token + workspace
       const token = response.data.token;
-      const workspaceId = response.data.workspace_id;
+      const createdWorkspaceId = response.data.workspace_id;
 
-      // Token'ı localStorage'a kaydet (giriş yapılmış oluyor)
       localStorage.setItem("token", token);
 
-      // ✔ Signup sonrası otomatik workspace sayfasına yönlendir
-      navigate(`/workspace/${workspaceId}`);
+      // 2) Eğer davetten geldiyse → workspace_members tablosuna EKLE
+      if (invitedWorkspaceId) {
+        await axios.post(
+          "http://localhost:8000/workspace/add-member",
+          {
+            workspace_id: Number(invitedWorkspaceId),
+            email: email,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        // Davetten geldiyse → o workspace'e götür
+        navigate(`/workspace/${invitedWorkspaceId}`);
+      } else {
+        // Normal signup → kendi workspace'ine götür
+        navigate(`/workspace/${createdWorkspaceId}`);
+      }
 
     } catch (err) {
       console.log(err);
