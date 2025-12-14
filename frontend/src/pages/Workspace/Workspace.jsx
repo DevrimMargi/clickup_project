@@ -1,10 +1,8 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { Outlet, useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 import Sidebar from "./components/Sidebar";
 import TopBar from "./components/TopBar";
-import StatsCards from "./components/StatsCards";
-import QuickActions from "./components/QuickActions";
 import InviteModal from "./components/InviteModal";
 
 export default function Workspace() {
@@ -13,50 +11,35 @@ export default function Workspace() {
 
   const [openInvite, setOpenInvite] = useState(false);
 
-  // ✔ Token yoksa kullanıcıyı login sayfasına at
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
+    if (!localStorage.getItem("token")) {
       navigate("/login");
     }
   }, [navigate]);
 
-  // ✔ Çıkış işlemi
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
-
-  // workspaceId number’a çevrildi (güvenli kullanım)
-  const wsId = Number(workspaceId);
-
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-[#0f172a] to-[#020617] text-white">
+    <div className="min-h-screen flex bg-[#0f172a] text-white">
 
-      {/* SIDEBAR */}
-      <Sidebar 
-        handleLogout={handleLogout} 
-        setOpenInvite={setOpenInvite} 
+      {/* Sol Menü */}
+      <Sidebar
+        workspaceId={workspaceId}
+        openInviteModal={() => setOpenInvite(true)}
+        handleLogout={() => {
+          localStorage.removeItem("token");
+          navigate("/login");
+        }}
       />
 
-      {/* MAIN CONTENT */}
-      <main className="flex-1 p-10">
-
-        {/* TOP BAR */}
-        <TopBar workspaceId={wsId} />
-
-        {/* STATS SECTION */}
-        <StatsCards />
-
-        {/* QUICK ACTIONS */}
-        <QuickActions setOpenInvite={setOpenInvite} />
-
+      {/* Ana İçerik */}
+      <main className="flex-1 p-8">
+        <TopBar workspaceId={workspaceId} />
+        <Outlet />
       </main>
 
-      {/* INVITE MODAL */}
+      {/* Invite Modal */}
       {openInvite && (
         <InviteModal
-          workspaceId={wsId}   // ✔ her zaman number
+          workspaceId={workspaceId}
           closeModal={() => setOpenInvite(false)}
         />
       )}

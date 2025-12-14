@@ -1,44 +1,47 @@
 export default function Dashboard() {
   return (
-    <div className="min-h-screen flex bg-gray-100">
+    <div className="text-gray-200">
 
-      {/* SIDEBAR */}
-      <aside className="w-64 bg-white shadow-lg p-5">
-        <h1 className="text-2xl font-bold mb-6 text-blue-600">ClickUp Clone</h1>
+      {/* Hoş geldin */}
+      <h1 className="text-3xl font-bold mb-2">Hoş geldin 👋</h1>
+      <p className="text-sm mb-6 text-gray-400">
+        Workspace kontrol paneline buradan ulaşabilirsin.
+      </p>
 
-        <nav className="space-y-3">
-          <a className="block text-gray-700 hover:text-blue-600 cursor-pointer">
-            🏠 Dashboard
-          </a>
-          <a className="block text-gray-700 hover:text-blue-600 cursor-pointer">
-            🗂 Çalışma Alanlarım
-          </a>
-          <a className="block text-gray-700 hover:text-blue-600 cursor-pointer">
-            ⚙️ Ayarlar
-          </a>
-        </nav>
-      </aside>
+      {/* Üst aksiyon butonları */}
+      <div className="flex gap-4 mb-8">
+        <button className="px-5 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium">
+          ➕ Görev Oluştur
+        </button>
 
-      {/* MAIN CONTENT */}
-      <main className="flex-1 p-10">
-        <h2 className="text-3xl font-semibold mb-6">Hoş geldin! 👋</h2>
+        <button className="px-5 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg font-medium">
+          ✉️ Davet Gönder
+        </button>
 
-        <div className="grid grid-cols-3 gap-6">
-          <div className="p-6 bg-white rounded-xl shadow hover:shadow-lg transition">
-            <h3 className="text-lg font-bold">Workspace 1</h3>
-            <p className="text-gray-600 mt-2">Proje ve görevlerini yönet.</p>
-          </div>
+        <button className="px-5 py-2 bg-green-600 hover:bg-green-700 rounded-lg font-medium">
+          👥 Takım Oluştur
+        </button>
+      </div>
 
-          <div className="p-6 bg-white rounded-xl shadow hover:shadow-lg transition">
-            <h3 className="text-lg font-bold">Workspace 2</h3>
-            <p className="text-gray-600 mt-2">Takım çalışmalarını planla.</p>
-          </div>
+      {/* 3 ana kart */}
+      <div className="grid grid-cols-3 gap-6">
 
-          <div className="p-6 bg-white rounded-xl shadow hover:shadow-lg transition">
-            <h3 className="text-lg font-bold">Yeni Workspace Oluştur +</h3>
-          </div>
+        <div className="bg-white/10 p-6 rounded-xl hover:bg-white/20 transition cursor-pointer">
+          <h2 className="font-semibold text-lg mb-2">Görev Yönetimi</h2>
+          <p className="text-gray-400">Görev oluştur, düzenle ve takım üyelerine ata.</p>
         </div>
-      </main>
+
+        <div className="bg-white/10 p-6 rounded-xl hover:bg-white/20 transition cursor-pointer">
+          <h2 className="font-semibold text-lg mb-2">Takımlar</h2>
+          <p className="text-gray-400">Takım oluştur ve üyeleri yönet.</p>
+        </div>
+
+        <div className="bg-white/10 p-6 rounded-xl hover:bg-white/20 transition cursor-pointer">
+          <h2 className="font-semibold text-lg mb-2">Ayarlar</h2>
+          <p className="text-gray-400">Workspace ayarlarını düzenle.</p>
+        </div>
+
+      </div>
     </div>
   );
 }

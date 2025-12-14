@@ -7,10 +7,11 @@ class Workspace(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
+
     owner_id = Column(Integer, ForeignKey("users.id"))
 
-    # Workspace'in sahibi
+    # Workspace’i oluşturan kullanıcı
     owner = relationship("User", back_populates="owned_workspaces")
 
-    # Workspace'in üyeleri (UserWorkspace tablosu ile bağlantı)
-    members = relationship("UserWorkspace", back_populates="workspace")
+    # Workspace’e üye olan kullanıcıların bağlantısı
+    workspace_users = relationship("UserWorkspace", back_populates="workspace")

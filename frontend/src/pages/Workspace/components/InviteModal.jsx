@@ -1,13 +1,22 @@
-import { useState } from "react";
-import { X } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export default function InviteModal({ closeModal, workspaceId }) {
   const [email, setEmail] = useState("");
+  const [role, setRole] = useState("Member");
   const [loading, setLoading] = useState(false);
+
+  // ESC ile kapatma
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === "Escape") closeModal();
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [closeModal]);
 
   const handleInvite = async () => {
     if (!email.trim()) {
-      alert("Lütfen bir email girin!");
+      alert("Lütfen bir email girin.");
       return;
     }
 
@@ -20,79 +29,86 @@ export default function InviteModal({ closeModal, workspaceId }) {
         body: JSON.stringify({
           email: email.trim(),
           workspace_id: Number(workspaceId),
+          role: role,
         }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        // ✔ Backend mesajını göster
         alert(data.message || "Davet başarıyla gönderildi!");
-
-        console.log("Invite URL:", data.invite_url);
-
         setEmail("");
         closeModal();
       } else {
-        // ❗ Backend hata mesajı düzgün gösteriliyor
-        alert(data.detail || data.message || "Bir hata oluştu!");
+        alert(data.detail || "Bir hata oluştu!");
       }
-    } catch (error) {
-      console.error("Invite error:", error);
-      alert("Sunucuya ulaşılamadı!");
+    } catch (err) {
+      alert("Sunucuya ulaşılamadı.");
+      console.error(err);
     }
 
     setLoading(false);
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-      <div className="bg-[#1f2937] w-[550px] rounded-2xl shadow-xl p-8 relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Overlay */}
+      <div
+        className="absolute inset-0 bg-black/60"
+        onClick={closeModal}
+      />
 
-        <button
-          className="absolute top-4 right-4 text-gray-400 hover:text-white"
-          onClick={closeModal}
-        >
-          <X size={22} />
-        </button>
-
-        <h2 className="text-2xl font-bold text-white mb-6">Invite people</h2>
-
-        <label className="text-gray-300 text-sm">Invite by email</label>
-        <input
-          type="email"
-          placeholder="example@email.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full mt-1 mb-6 px-4 py-2 rounded-lg bg-gray-700 text-white 
-                     border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-
-        <label className="text-gray-300 text-sm">Invite as</label>
-        <div className="mt-2 mb-8 flex items-center gap-2 bg-gray-700 p-3 rounded-lg border border-gray-600">
-          <span className="text-xl">👥</span>
-          <div>
-            <p className="text-white font-semibold">Member</p>
-            <p className="text-gray-400 text-xs">
-              Can access all public items in your Workspace.
-            </p>
-          </div>
+      {/* Modal Box */}
+      <div className="relative bg-[#0f172a] w-[450px] rounded-xl p-6 shadow-lg text-white z-10">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-semibold">Invite people</h2>
+          <button
+            className="text-gray-400 hover:text-white text-2xl"
+            onClick={closeModal}
+          >
+            ×
+          </button>
         </div>
 
-        <div className="flex justify-end gap-4">
+        {/* Email Input */}
+        <label className="block text-sm text-gray-300 mb-1">Invite by email</label>
+        <input
+          type="email"
+          placeholder="Email, comma or space separated"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full mb-4 px-3 py-2 rounded bg-[#1e293b] border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+
+        {/* Role Selection */}
+        <label className="block text-sm text-gray-300 mb-1">Invite as</label>
+        <select
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          className="w-full mb-6 px-3 py-2 rounded bg-[#1e293b] border border-gray-600"
+        >
+          <option value="Member">Member</option>
+          <option value="Admin">Admin</option>
+        </select>
+        <p className="text-xs text-gray-400 mb-4">
+          Can access all public items in your Workspace.
+        </p>
+
+        {/* Buttons */}
+        <div className="flex justify-end gap-3">
           <button
-            className="px-4 py-2 rounded-lg bg-gray-600 text-white hover:bg-gray-500"
             onClick={closeModal}
+            className="px-4 py-2 text-sm text-gray-300 hover:text-white"
           >
             Cancel
           </button>
-
           <button
-            className="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
             onClick={handleInvite}
             disabled={loading}
+            className="px-4 py-2 rounded bg-white text-black font-semibold hover:bg-gray-300 disabled:opacity-50"
           >
-            {loading ? "Sending..." : "Send Invite"}
+            {loading ? "Sending..." : "Send invite"}
           </button>
         </div>
       </div>
