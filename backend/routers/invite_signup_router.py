@@ -7,51 +7,56 @@ from models.invite import Invite
 from models.user_workspace import UserWorkspace
 from schemas.invite_signup_schema import InviteSignupSchema
 from auth.hashing import hash_password
+from auth.jwt_handler import create_access_token  # ✅ EKLENDİ
 
 router = APIRouter(prefix="/invite", tags=["Invite Signup"])
 
 
-# -------------------------------------------------------------------
-# 📌 DAVET ÜZERİNDEN SIGNUP → WORKSPACE'E KATIL
-# -------------------------------------------------------------------
 @router.post("/signup")
 def invite_signup(data: InviteSignupSchema, db: Session = Depends(get_db)):
+    # 1️⃣ Invite var mı?
+    invite = db.query(Invite).filter_by(
+        token=data.token,
+        accepted=False
+    ).first()
 
-    # 1) Email zaten var mı?
-    existing_user = db.query(User).filter(User.email == data.email).first()
+    if not invite:
+        raise HTTPException(status_code=400, detail="Invite not found or already used")
+
+    # 2️⃣ Email zaten kayıtlı mı?
+    existing_user = db.query(User).filter_by(email=data.email).first()
     if existing_user:
-        raise HTTPException(status_code=400, detail="Bu email zaten kayıtlı!")
+        raise HTTPException(status_code=400, detail="Email already registered")
 
-    # 2) Yeni kullanıcı oluştur
-    new_user = User(
+    # 3️⃣ User oluştur
+    user = User(
         full_name=data.full_name,
         email=data.email,
         password_hash=hash_password(data.password)
     )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+    db.add(user)
+    db.flush()  # user.id almak için
 
-    # 3) Davet kaydını bul
-    invite = db.query(Invite).filter(Invite.token == data.token).first()
-    if not invite:
-        raise HTTPException(status_code=400, detail="Davet bulunamadı.")
-
-    # 4) Daveti kabul edildi olarak işaretle
-    invite.accepted = True
-    db.commit()
-
-    # 5) Kullanıcıyı workspace'e ekle
+    # 4️⃣ Workspace'e MEMBER ekle
     membership = UserWorkspace(
-        user_id=new_user.id,
-        workspace_id=invite.workspace_id
+        user_id=user.id,
+        workspace_id=invite.workspace_id,
+        role="member"
     )
     db.add(membership)
+
+    # 5️⃣ Invite kapat
+    invite.accepted = True
+
+    # 6️⃣ JWT TOKEN OLUŞTUR (🔥 EN KRİTİK SATIR)
+    token = create_access_token({"user_id": user.id})
+
+    # 7️⃣ Commit
     db.commit()
 
-    # 6) Sonuç
     return {
-        "message": "Workspace'e başarıyla katıldınız!",
-        "workspace_id": invite.workspace_id,
-        "user_id": new_user.id
+        "message": "Signup + workspace join successful",
+        "token": token,                 # ✅ EKLENDİ
+        "user_id": user.id,
+        "workspace_id": invite.workspace_id
     }

@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 class InviteSignupSchema(BaseModel):
     full_name: str
-    email: str
+    email: EmailStr
     password: str
     token: str

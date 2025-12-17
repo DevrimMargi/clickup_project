@@ -1,54 +1,34 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
 from db.connection import get_db
-from models.invite import Invite
-from schemas.invite_schema import InviteRequest
-import uuid
+from models.user import User
+from models.user_workspace import UserWorkspace
 
-# 📩 Mail fonksiyonunu import ediyoruz
-from core.mail import send_invite_email
-
-router = APIRouter(prefix="/invite", tags=["Invite"])
+router = APIRouter(prefix="/workspace", tags=["Workspace"])
 
 
-# --- 📩 1) Davet Gönder ---
-@router.post("/send")
-def send_invite(request: InviteRequest, db: Session = Depends(get_db)):
-    token = str(uuid.uuid4())
-
-    invite = Invite(
-        email=request.email,
-        token=token,
-        workspace_id=request.workspace_id,
-        accepted=False
+@router.get("/{workspace_id}/members")
+def get_workspace_members(
+    workspace_id: int,
+    db: Session = Depends(get_db)
+):
+    members = (
+        db.query(User, UserWorkspace.role)
+        .join(UserWorkspace, User.id == UserWorkspace.user_id)
+        .filter(UserWorkspace.workspace_id == workspace_id)
+        .all()
     )
 
-    db.add(invite)
-    db.commit()
-    db.refresh(invite)
+    if not members:
+        return []
 
-    # --- 📬 Davet Linki ---
-    invite_url = f"http://localhost:5173/accept-invite/{token}"
-
-    # --- 📧 Mail gerçekten burada gönderiliyor ---
-    send_invite_email(request.email, invite_url)
-
-    return {
-        "message": "Invite sent!",
-        "invite_url": invite_url
-    }
-
-
-# --- ✔ 2) Daveti Kontrol Et / Kabul Et ---
-@router.get("/accept/{token}")
-def accept_invite(token: str, db: Session = Depends(get_db)):
-    invite = db.query(Invite).filter(Invite.token == token).first()
-
-    if not invite:
-        raise HTTPException(status_code=400, detail="Geçersiz veya süresi dolmuş davet.")
-
-    return {
-        "email": invite.email,
-        "workspace_id": invite.workspace_id,
-        "accepted": invite.accepted
-    }
+    return [
+        {
+            "id": user.id,
+            "full_name": user.full_name,
+            "email": user.email,
+            "role": role,
+        }
+        for user, role in members
+    ]

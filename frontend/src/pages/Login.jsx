@@ -1,18 +1,25 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function Login() {
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const navigate = useNavigate();
+  // 🔁 Sayfa açılınca state sıfırla
+  useEffect(() => {
+    setFormData({
+      email: "",
+      password: "",
+    });
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -33,7 +40,6 @@ export default function Login() {
     }
 
     try {
-      // ✔ DOĞRU BACKEND URL
       const response = await axios.post(
         "http://localhost:8000/auth/login",
         {
@@ -42,24 +48,16 @@ export default function Login() {
         }
       );
 
-      console.log("Login Response:", response.data);
-
       const token = response.data.token;
       const workspaceId = response.data.workspace_id;
 
-      // ✔ token kaydet
       localStorage.setItem("token", token);
-
-      // ✔ otomatik workspace'e git
       navigate(`/workspace/${workspaceId}`);
-
     } catch (err) {
-      const errorMessage =
+      setError(
         err.response?.data?.detail ||
-        "Giriş başarısız. Bilgilerinizi kontrol edin.";
-
-      setError(errorMessage);
-      console.error("Login Error:", err);
+          "Giriş başarısız. Bilgilerinizi kontrol edin."
+      );
     } finally {
       setLoading(false);
     }
@@ -79,15 +77,36 @@ export default function Login() {
           </div>
         )}
 
-        <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
-          
+        {/* 🔒 AUTOFILL ENGELLEME FORMU */}
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={handleSubmit}
+          autoComplete="off"
+        >
+          {/* 🧨 CHROME AUTOFILL TUZAĞI (SAHTE INPUTLAR) */}
+          <input
+            type="text"
+            name="fake-username"
+            autoComplete="username"
+            tabIndex="-1"
+            style={{ position: "absolute", opacity: 0, height: 0 }}
+          />
+
+          <input
+            type="password"
+            name="fake-password"
+            autoComplete="current-password"
+            tabIndex="-1"
+            style={{ position: "absolute", opacity: 0, height: 0 }}
+          />
+
+          {/* ✅ GERÇEK INPUTLAR */}
           <input
             type="email"
             name="email"
             placeholder="Email"
             value={formData.email}
             onChange={handleChange}
-            required
             disabled={loading}
             className="border px-4 py-2 rounded-lg"
           />
@@ -98,20 +117,18 @@ export default function Login() {
             placeholder="Password"
             value={formData.password}
             onChange={handleChange}
-            required
             disabled={loading}
             className="border px-4 py-2 rounded-lg"
           />
 
           <button
             type="submit"
-            className="bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
             disabled={loading}
+            className="bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
           >
             {loading ? "Giriş Yapılıyor..." : "Login"}
           </button>
         </form>
-
       </div>
     </div>
   );

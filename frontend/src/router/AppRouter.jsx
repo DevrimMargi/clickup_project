@@ -6,14 +6,14 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "../pages/Landing";
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
-import AcceptInvite from "../pages/AcceptInvite";
 import InviteSignup from "../pages/InviteSignup";
 
 // Workspace Layout
 import Workspace from "../pages/Workspace/Workspace";
+import MembersPage from "../pages/Workspace/MembersPage";
 
 // Workspace Inner Pages
-import Dashboard from "../pages/Dashboard"; // Ana dashboard
+import Dashboard from "../pages/Dashboard";
 import TasksPage from "../pages/Workspace/TasksPage";
 import InvitesPage from "../pages/Workspace/InvitesPage";
 import SpacesPage from "../pages/Workspace/SpacesPage";
@@ -23,26 +23,32 @@ export default function AppRouter() {
     <BrowserRouter>
       <Routes>
 
-        {/* PUBLIC ROUTES */}
+        {/* ========== PUBLIC ROUTES ========== */}
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/accept-invite/:token" element={<AcceptInvite />} />
-        <Route path="/invite-signup/:token" element={<InviteSignup />} />
 
-        {/* WORKSPACE ROUTES */}
+        {/* Davet linki → Signup */}
+        <Route
+          path="/accept-invite/:token"
+          element={<InviteSignup />}
+        />
+
+        {/* ========== WORKSPACE ROUTES ========== */}
         <Route path="/workspace/:workspaceId" element={<Workspace />}>
 
-          {/* Workspace Ana Sayfa */}
+          {/* Ana dashboard */}
           <Route index element={<Dashboard />} />
 
-          {/* Workspace iç sayfalar */}
+          {/* Workspace sayfaları */}
+          <Route path="members" element={<MembersPage />} />
           <Route path="tasks" element={<TasksPage />} />
           <Route path="invites" element={<InvitesPage />} />
           <Route path="spaces" element={<SpacesPage />} />
           <Route path="spaces/:projectId/tasks" element={<TasksPage />} />
 
         </Route>
+
       </Routes>
     </BrowserRouter>
   );

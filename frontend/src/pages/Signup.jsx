@@ -1,18 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function Signup() {
   const navigate = useNavigate();
-  const [params] = useSearchParams();
-
-  // Davetten geldiyse workspace_id burada olur:
-  const invitedWorkspaceId = params.get("workspace_id");
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordAgain, setPasswordAgain] = useState("");
+
+  // 🔁 Sayfa açılınca alanları sıfırla (GARANTİ)
+  useEffect(() => {
+    setFullName("");
+    setEmail("");
+    setPassword("");
+    setPasswordAgain("");
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,53 +27,23 @@ export default function Signup() {
     }
 
     try {
-      // 1) Signup isteği
       const response = await axios.post(
         "http://localhost:8000/auth/signup",
         {
           full_name: fullName,
-          email: email,
-          password: password,
+          email,
+          password,
         },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        { headers: { "Content-Type": "application/json" } }
       );
 
-      alert(response.data.message || "Kayıt başarılı!");
-
-      // Backend'den gelen token + workspace
       const token = response.data.token;
-      const createdWorkspaceId = response.data.workspace_id;
+      const workspaceId = response.data.workspace_id;
 
       localStorage.setItem("token", token);
-
-      // 2) Eğer davetten geldiyse → workspace_members tablosuna EKLE
-      if (invitedWorkspaceId) {
-        await axios.post(
-          "http://localhost:8000/workspace/add-member",
-          {
-            workspace_id: Number(invitedWorkspaceId),
-            email: email,
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        // Davetten geldiyse → o workspace'e götür
-        navigate(`/workspace/${invitedWorkspaceId}`);
-      } else {
-        // Normal signup → kendi workspace'ine götür
-        navigate(`/workspace/${createdWorkspaceId}`);
-      }
+      navigate(`/workspace/${workspaceId}`);
 
     } catch (err) {
-      console.log(err);
       alert(err.response?.data?.detail || "Bir hata oluştu");
     }
   };
@@ -77,10 +51,6 @@ export default function Signup() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-200 via-white to-blue-100 px-4">
       <div className="w-full max-w-sm bg-white shadow-2xl rounded-2xl p-7 border border-blue-100">
-
-        <div className="flex justify-center mb-3 text-blue-500 text-5xl">
-          <span>📝</span>
-        </div>
 
         <h2 className="text-2xl font-extrabold text-center text-gray-800">
           Hesabınızı Oluşturun
@@ -90,29 +60,39 @@ export default function Signup() {
           Hızlıca ücretsiz bir hesap oluşturun.
         </p>
 
-        <form className="space-y-3" onSubmit={handleSubmit}>
-
+        {/* 🔒 AUTOFILL KAPALI */}
+        <form
+          className="space-y-3"
+          onSubmit={handleSubmit}
+          autoComplete="off"
+        >
           <div>
-            <label className="text-gray-700 font-medium text-sm">Adınız Soyadınız</label>
+            <label className="text-gray-700 font-medium text-sm">
+              Adınız Soyadınız
+            </label>
             <input
               type="text"
+              name="signup-fullname"
+              autoComplete="off"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               required
-              className="w-full mt-1 px-4 py-2.5 rounded-lg bg-gray-100 border border-gray-300 
-              focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 text-sm"
+              className="w-full mt-1 px-4 py-2.5 rounded-lg bg-gray-100 border border-gray-300"
             />
           </div>
 
           <div>
-            <label className="text-gray-700 font-medium text-sm">E-posta Adresi</label>
+            <label className="text-gray-700 font-medium text-sm">
+              E-posta Adresi
+            </label>
             <input
               type="email"
+              name="signup-email"
+              autoComplete="new-email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full mt-1 px-4 py-2.5 rounded-lg bg-gray-100 border border-gray-300 
-              focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 text-sm"
+              className="w-full mt-1 px-4 py-2.5 rounded-lg bg-gray-100 border border-gray-300"
             />
           </div>
 
@@ -120,31 +100,34 @@ export default function Signup() {
             <label className="text-gray-700 font-medium text-sm">Şifre</label>
             <input
               type="password"
+              name="signup-password"
+              autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full mt-1 px-4 py-2.5 rounded-lg bg-gray-100 border border-gray-300 
-              focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 text-sm"
+              className="w-full mt-1 px-4 py-2.5 rounded-lg bg-gray-100 border border-gray-300"
             />
           </div>
 
           <div>
-            <label className="text-gray-700 font-medium text-sm">Şifre Tekrarı</label>
+            <label className="text-gray-700 font-medium text-sm">
+              Şifre Tekrarı
+            </label>
             <input
               type="password"
+              name="signup-password-confirm"
+              autoComplete="new-password"
               value={passwordAgain}
               onChange={(e) => setPasswordAgain(e.target.value)}
               required
-              className="w-full mt-1 px-4 py-2.5 rounded-lg bg-gray-100 border border-gray-300 
-              focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 text-sm"
+              className="w-full mt-1 px-4 py-2.5 rounded-lg bg-gray-100 border border-gray-300"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full py-3 mt-3 text-white font-semibold text-md rounded-lg 
-            bg-blue-600 hover:bg-blue-700 transition shadow-md"
+            className="w-full py-3 mt-3 text-white font-semibold rounded-lg bg-blue-600 hover:bg-blue-700"
           >
             Hesap Oluştur
           </button>

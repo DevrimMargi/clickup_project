@@ -5,23 +5,18 @@ export default function InviteModal({ closeModal, workspaceId }) {
   const [role, setRole] = useState("Member");
   const [loading, setLoading] = useState(false);
 
-  // ESC ile kapatma
   useEffect(() => {
-    const handleEsc = (e) => {
-      if (e.key === "Escape") closeModal();
-    };
+    const handleEsc = (e) => (e.key === "Escape" ? closeModal() : null);
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
   }, [closeModal]);
 
   const handleInvite = async () => {
-    if (!email.trim()) {
-      alert("Lütfen bir email girin.");
+    if (!email.trim() || !email.includes("@")) {
+      alert("Lütfen geçerli bir e-posta adresi girin.");
       return;
     }
-
     setLoading(true);
-
     try {
       const response = await fetch("http://localhost:8000/invite/send", {
         method: "POST",
@@ -32,86 +27,130 @@ export default function InviteModal({ closeModal, workspaceId }) {
           role: role,
         }),
       });
-
-      const data = await response.json();
-
       if (response.ok) {
-        alert(data.message || "Davet başarıyla gönderildi!");
-        setEmail("");
+        alert("Davet başarıyla gönderildi! 🎉");
         closeModal();
-      } else {
-        alert(data.detail || "Bir hata oluştu!");
       }
     } catch (err) {
-      alert("Sunucuya ulaşılamadı.");
-      console.error(err);
+      alert("Bağlantı hatası.");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
       {/* Overlay */}
-      <div
-        className="absolute inset-0 bg-black/60"
-        onClick={closeModal}
-      />
+      <div className="absolute inset-0" onClick={closeModal} />
 
-      {/* Modal Box */}
-      <div className="relative bg-[#0f172a] w-[450px] rounded-xl p-6 shadow-lg text-white z-10">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">Invite people</h2>
+      {/* Modal Kutusu: 600px genişlik - Tam kararında */}
+      <div className="relative bg-[#0f172a] w-full max-w-[600px] rounded-[2.5rem] p-10 shadow-[0_0_60px_rgba(79,70,229,0.25)] border border-white/5 animate-fade-in-up z-10">
+        
+        {/* Header Section */}
+        <div className="flex justify-between items-start mb-10">
+          <div className="space-y-2">
+            <h2 className="text-3xl font-black text-white tracking-tight uppercase italic">
+              DAVET ET <span className="text-indigo-500 italic">!</span>
+            </h2>
+            <p className="text-slate-400 text-base font-medium">
+              Ekibini büyütmek için e-posta gönder.
+            </p>
+          </div>
           <button
-            className="text-gray-400 hover:text-white text-2xl"
             onClick={closeModal}
+            className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 text-slate-400 hover:text-white transition-all"
           >
-            ×
+            <span className="text-xl font-light">×</span>
           </button>
         </div>
 
-        {/* Email Input */}
-        <label className="block text-sm text-gray-300 mb-1">Invite by email</label>
-        <input
-          type="email"
-          placeholder="Email, comma or space separated"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full mb-4 px-3 py-2 rounded bg-[#1e293b] border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <div className="space-y-8">
+          {/* Email Input */}
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] ml-1">
+              E-POSTA ADRESİ
+            </label>
+            <div className="flex items-center bg-slate-900 border border-slate-800 rounded-2xl px-6 py-4 focus-within:border-indigo-500/50 transition-all duration-300">
+              <input
+                type="email"
+                autoFocus
+                placeholder="arkadasin@sirket.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-transparent text-white text-lg font-medium outline-none placeholder:text-slate-700"
+              />
+            </div>
+          </div>
 
-        {/* Role Selection */}
-        <label className="block text-sm text-gray-300 mb-1">Invite as</label>
-        <select
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          className="w-full mb-6 px-3 py-2 rounded bg-[#1e293b] border border-gray-600"
-        >
-          <option value="Member">Member</option>
-          <option value="Admin">Admin</option>
-        </select>
-        <p className="text-xs text-gray-400 mb-4">
-          Can access all public items in your Workspace.
-        </p>
+          {/* Rol Seçimi: MoreModal Esintili Kartlar */}
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] ml-1">
+              YETKİ SEVİYESİ
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+              {/* Member Card */}
+              <button
+                onClick={() => setRole("Member")}
+                className={`flex flex-col items-start p-6 rounded-3xl border-2 transition-all duration-300 group ${
+                  role === "Member"
+                    ? "bg-indigo-600/10 border-indigo-500 shadow-lg shadow-indigo-500/10"
+                    : "bg-slate-900/40 border-slate-800 hover:border-slate-700"
+                }`}
+              >
+                <div className={`text-3xl mb-3 transition-transform duration-300 ${role === "Member" ? "scale-110" : "opacity-40"}`}>
+                  👤
+                </div>
+                <h3 className={`text-lg font-bold ${role === "Member" ? "text-white" : "text-slate-400"}`}>
+                  Üye
+                </h3>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed text-left line-clamp-2">
+                  Görevlerde çalışır ve iş birliği yapar.
+                </p>
+              </button>
 
-        {/* Buttons */}
-        <div className="flex justify-end gap-3">
-          <button
-            onClick={closeModal}
-            className="px-4 py-2 text-sm text-gray-300 hover:text-white"
-          >
-            Cancel
-          </button>
+              {/* Admin Card */}
+              <button
+                onClick={() => setRole("Admin")}
+                className={`flex flex-col items-start p-6 rounded-3xl border-2 transition-all duration-300 group ${
+                  role === "Admin"
+                    ? "bg-indigo-600/10 border-indigo-500 shadow-lg shadow-indigo-500/10"
+                    : "bg-slate-900/40 border-slate-800 hover:border-slate-700"
+                }`}
+              >
+                <div className={`text-3xl mb-3 transition-transform duration-300 ${role === "Admin" ? "scale-110" : "opacity-40"}`}>
+                  ⚡
+                </div>
+                <h3 className={`text-lg font-bold ${role === "Admin" ? "text-white" : "text-slate-400"}`}>
+                  Yönetici
+                </h3>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed text-left line-clamp-2">
+                  Tüm ayarları ve üyeleri yönetir.
+                </p>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Actions */}
+        <div className="mt-10 flex flex-col items-center gap-4">
           <button
             onClick={handleInvite}
-            disabled={loading}
-            className="px-4 py-2 rounded bg-white text-black font-semibold hover:bg-gray-300 disabled:opacity-50"
+            disabled={loading || !email}
+            className="w-full bg-indigo-600 hover:bg-indigo-500 py-5 rounded-2xl text-white font-black 
+                       text-sm tracking-[0.2em] uppercase transition-all shadow-xl shadow-indigo-500/20
+                       active:scale-[0.97] disabled:opacity-20 flex items-center justify-center gap-3"
           >
-            {loading ? "Sending..." : "Send invite"}
+            {loading ? "GÖNDERİLİYOR..." : "DAVET ET 🚀"}
+          </button>
+          <button
+            onClick={closeModal}
+            className="text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-[0.3em] transition-colors py-2"
+          >
+            Vazgeç
           </button>
         </div>
       </div>
     </div>
   );
 }
+

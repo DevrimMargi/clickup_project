@@ -6,9 +6,9 @@ class Invite(Base):
     __tablename__ = "invites"
 
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, nullable=False)
-    token = Column(String, unique=True, nullable=False)
-    workspace_id = Column(Integer, ForeignKey("workspaces.id"))
+    email = Column(String, index=True, nullable=False)
+    token = Column(String, unique=True, index=True, nullable=False)
+    workspace_id = Column(Integer, ForeignKey("workspaces.id"), nullable=False)
     accepted = Column(Boolean, default=False)
 
     workspace = relationship("Workspace")
