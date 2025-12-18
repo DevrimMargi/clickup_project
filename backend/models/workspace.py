@@ -6,11 +6,13 @@ from db.connection import Base
 class Workspace(Base):
     __tablename__ = "workspaces"
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
-    owner_id = Column(Integer, ForeignKey("users.id"))
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(150), nullable=False)
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
-    owner = relationship("User")
+    # 🔗 İlişkiler
+    owner = relationship("User", back_populates="owned_workspaces")
+
     workspace_users = relationship(
         "UserWorkspace",
         back_populates="workspace",

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from fastapi import HTTPException
 
 from db.connection import get_db
 from models.project import Project
@@ -24,3 +25,19 @@ def create_project(data: ProjectCreate, db: Session = Depends(get_db)):
 @router.get("/workspace/{workspace_id}", response_model=list[ProjectResponse])
 def get_projects_by_workspace(workspace_id: int, db: Session = Depends(get_db)):
     return db.query(Project).filter(Project.workspace_id == workspace_id).all()
+
+@router.delete("/{project_id}")
+def delete_project(
+    project_id:int,
+    db:Session=Depends(get_db)
+):
+    project=db.query(Project).filter(Project.id==project_id).first()
+    
+    if not project:
+        raise HTTPException(status_code=404,detail="Project not found")
+    
+    db.delete(project)
+    db.commit()
+    
+    return {"message":"Project deleted"}
+    

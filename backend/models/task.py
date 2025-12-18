@@ -6,15 +6,32 @@ from db.connection import Base
 class Task(Base):
     __tablename__ = "tasks"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     status = Column(String)
     priority = Column(String)
     due_date = Column(Date)
 
-    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
-    assignee_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    # 🔥 CASCADE BURADA
+    project_id = Column(
+        Integer,
+        ForeignKey("projects.id", ondelete="CASCADE"),
+        nullable=False
+    )
+
+    assignee_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=True
+    )
 
     # 🔗 İLİŞKİLER
-    project = relationship("Project", back_populates="tasks")
-    assignee = relationship("User", back_populates="assigned_tasks")
+    project = relationship(
+        "Project",
+        back_populates="tasks"
+    )
+
+    assignee = relationship(
+        "User",
+        back_populates="assigned_tasks"
+    )

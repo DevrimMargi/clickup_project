@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from db.connection import get_db
@@ -13,15 +13,17 @@ router = APIRouter(prefix="/tasks", tags=["Tasks"])
 # 🟢 TASK OLUŞTUR
 # -------------------------------------------------
 @router.post("/")
-def create_task(data: TaskCreate, db: Session = Depends(get_db)):
-
+def create_task(
+    data: TaskCreate,
+    db: Session = Depends(get_db)
+):
     task = Task(
         title=data.title,
-        due_date=data.due_date,
-        priority=data.priority,
         status=data.status,
+        priority=data.priority,
+        due_date=data.due_date,
         project_id=data.project_id,
-        assignee_id=data.assignee_id,
+        assignee_id=data.assignee_id
     )
 
     db.add(task)
@@ -36,15 +38,19 @@ def create_task(data: TaskCreate, db: Session = Depends(get_db)):
         "due": task.due_date,
         "project_id": task.project_id,
         "assignee_id": task.assignee_id,
+        "assignee_fullname": task.assignee.full_name if task.assignee else None
     }
 
 
 # -------------------------------------------------
-# 🟢 WORKSPACE TASK'LARI
+# 🟢 WORKSPACE’E AİT TÜM TASK’LAR
+# (PROJECT ÜZERİNDEN JOIN)
 # -------------------------------------------------
 @router.get("/workspace/{workspace_id}")
-def get_tasks(workspace_id: int, db: Session = Depends(get_db)):
-
+def get_tasks_by_workspace(
+    workspace_id: int,
+    db: Session = Depends(get_db)
+):
     tasks = (
         db.query(Task)
         .join(Project, Task.project_id == Project.id)
@@ -52,10 +58,8 @@ def get_tasks(workspace_id: int, db: Session = Depends(get_db)):
         .all()
     )
 
-    response = []
-
-    for t in tasks:
-        response.append({
+    return [
+        {
             "id": t.id,
             "title": t.title,
             "status": t.status,
@@ -63,11 +67,52 @@ def get_tasks(workspace_id: int, db: Session = Depends(get_db)):
             "due": t.due_date,
             "project_id": t.project_id,
             "assignee_id": t.assignee_id,
-            # 🔥 NULL SAFE
-            "assignee": {
-                "id": t.assignee.id,
-                "full_name": t.assignee.full_name,
-            } if getattr(t, "assignee", None) else None,
-        })
+            "assignee_fullname": t.assignee.full_name if t.assignee else None
+        }
+        for t in tasks
+    ]
 
-    return response
+
+# -------------------------------------------------
+# 🟢 PROJECT’E AİT TASK’LAR
+# -------------------------------------------------
+@router.get("/project/{project_id}")
+def get_tasks_by_project(
+    project_id: int,
+    db: Session = Depends(get_db)
+):
+    tasks = (
+        db.query(Task)
+        .filter(Task.project_id == project_id)
+        .all()
+    )
+
+    return [
+        {
+            "id": t.id,
+            "title": t.title,
+            "status": t.status,
+            "priority": t.priority,
+            "due": t.due_date,
+            "project_id": t.project_id,
+            "assignee_id": t.assignee_id,
+            "assignee_fullname": t.assignee.full_name if t.assignee else None
+        }
+        for t in tasks
+    ]
+
+
+# -------------------------------------------------
+# 🔴 TASK SİL
+# -------------------------------------------------
+@router.delete("/{task_id}")
+def delete_task(task_id: int, db: Session = Depends(get_db)):
+    task = db.query(Task).filter(Task.id == task_id).first()
+
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    db.delete(task)
+    db.commit()
+
+    return {"message": "Task deleted"}

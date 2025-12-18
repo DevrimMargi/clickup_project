@@ -48,7 +48,7 @@ export default function SpacesPage() {
           status: t.status,
           priority: t.priority,
           due: t.due,
-          assignee: t.assignee?.full_name || null,
+          assignee: t.assignee_fullname || null,
           assignee_id: t.assignee_id,
           project_id: pid,
         });
@@ -91,13 +91,28 @@ export default function SpacesPage() {
     }
   };
 
-  const handleDeleteProject = (id, e) => {
-    e.stopPropagation();
-    if (window.confirm("Projeyi silmek istediğinize emin misiniz?")) {
-      setProjects((prev) => prev.filter((p) => p.id !== id));
-      if (selectedProjectId === id) setSelectedProjectId(null);
+  const handleDeleteProject = async (id, e) => {
+  e.stopPropagation();
+
+  if (!window.confirm("Projeyi silmek istediğinize emin misiniz?")) return;
+
+  try {
+    // ✅ 1) BACKEND'DEN PROJEYİ SİL
+    await axios.delete(`http://localhost:8000/projects/${id}`);
+
+    // ✅ 2) FRONTEND STATE'TEN SİL
+    setProjects((prev) => prev.filter((p) => p.id !== id));
+
+    // ✅ 3) Seçili proje silindiyse resetle
+    if (selectedProjectId === id) {
+      setSelectedProjectId(null);
     }
-  };
+  } catch (err) {
+    console.error("Proje silinemedi", err);
+    alert("Proje silinirken hata oluştu.");
+  }
+};
+
 
   /* ---------------- GÖREV İŞLEMLERİ ---------------- */
   const handleOpenTaskModal = (task = null) => {
@@ -105,16 +120,32 @@ export default function SpacesPage() {
     setShowTaskModal(true);
   };
 
-  const handleDeleteTask = (taskId, e) => {
-    e.stopPropagation();
-    if (!window.confirm("Görevi silmek istediğinden emin misin?")) return;
+  const handleDeleteTask = async (taskId, e) => {
+  e.stopPropagation();
+
+  if (!window.confirm("Görevi silmek istediğinden emin misin?")) return;
+
+  try {
+    // ✅ 1) BACKEND'DEN SİL
+    await axios.delete(`http://localhost:8000/tasks/${taskId}`);
+
+    // ✅ 2) FRONTEND STATE'TEN SİL
     setProjects((prev) =>
       prev.map((project) => {
         if (project.id !== selectedProjectId) return project;
-        return { ...project, tasks: project.tasks.filter((t) => t.id !== taskId) };
+
+        return {
+          ...project,
+          tasks: project.tasks.filter((t) => t.id !== taskId),
+        };
       })
     );
-  };
+  } catch (err) {
+    console.error("Görev silinemedi", err);
+    alert("Görev silinirken hata oluştu");
+  }
+};
+
 
   const handleSaveTask = async (data) => {
     try {

@@ -1,9 +1,15 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
-from sqlalchemy.orm import Session
 
-from db.connection import SessionLocal
+from db.connection import engine, SessionLocal, Base
+
+# 🔥 MODELLERİ BURADA IMPORT ET (ÇOK ÖNEMLİ)
+from models.user import User
+from models.workspace import Workspace
+from models.project import Project
+from models.task import Task
+from models.invite import Invite
 
 # Routers
 from auth.auth_router import router as auth_router
@@ -16,7 +22,7 @@ from routers.invite_signup_router import router as invite_signup_router
 app = FastAPI(title="ClickUp Clone API")
 
 # -------------------------------------------------
-# ✅ CORS (EN ÜSTE – ROUTER’DAN ÖNCE)
+# ✅ CORS (EN ÜSTE)
 # -------------------------------------------------
 app.add_middleware(
     CORSMiddleware,
@@ -30,17 +36,9 @@ app.add_middleware(
 )
 
 # -------------------------------------------------
-# DB SESSION
+# ✅ STARTUP EVENT (TEK VE DOĞRU create_all)
 # -------------------------------------------------
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
-# -------------------------------------------------
-# ROUTERS
 # -------------------------------------------------
 app.include_router(auth_router)
 app.include_router(workspace_router)
