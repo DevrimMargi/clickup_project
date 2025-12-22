@@ -8,6 +8,25 @@ from models.user_workspace import UserWorkspace
 
 router = APIRouter(prefix="/workspaces", tags=["Workspaces"])
 
+@router.get("/{workspace_id}", status_code=status.HTTP_200_OK)
+def get_workspace(
+    workspace_id: int,
+    db: Session = Depends(get_db)
+):
+    workspace = db.query(Workspace).filter(Workspace.id == workspace_id).first()
+
+    if not workspace:
+        raise HTTPException(
+            status_code=404,
+            detail="Workspace bulunamadı"
+        )
+
+    return {
+        "id": workspace.id,
+        "name": workspace.name
+    }
+
+
 
 @router.get("/{workspace_id}/members", status_code=status.HTTP_200_OK)
 def get_workspace_members(

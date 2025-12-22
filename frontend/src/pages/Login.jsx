@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 
 export default function Login() {
@@ -13,30 +13,26 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // 🔁 Sayfa açılınca state sıfırla
   useEffect(() => {
-    const savedEmail=localStorage.getItem("login_email");
-
+    const savedEmail = localStorage.getItem("login_email");
     setFormData({
       email: savedEmail || "",
       password: "",
-
-    
     });
   }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-  setFormData((prev) => ({
-    ...prev,
-    [name]: value,
-  }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
 
-  if (name === "email") {
-    localStorage.setItem("login_email", value);
-  }
-};
+    if (name === "email") {
+      localStorage.setItem("login_email", value);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -76,7 +72,6 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-6">
       <div className="bg-white shadow-lg p-8 rounded-xl w-full max-w-md">
-
         <h2 className="text-3xl font-bold text-blue-600 mb-6 text-center">
           Login
         </h2>
@@ -87,30 +82,11 @@ export default function Login() {
           </div>
         )}
 
-        {/* 🔒 AUTOFILL ENGELLEME FORMU */}
         <form
           className="flex flex-col gap-4"
           onSubmit={handleSubmit}
           autoComplete="off"
         >
-          {/* 🧨 CHROME AUTOFILL TUZAĞI (SAHTE INPUTLAR) */}
-          <input
-            type="text"
-            name="fake-username"
-            autoComplete="username"
-            tabIndex="-1"
-            style={{ position: "absolute", opacity: 0, height: 0 }}
-          />
-
-          <input
-            type="password"
-            name="fake-password"
-            autoComplete="current-password"
-            tabIndex="-1"
-            style={{ position: "absolute", opacity: 0, height: 0 }}
-          />
-
-          {/* ✅ GERÇEK INPUTLAR */}
           <input
             type="email"
             name="email"
@@ -130,6 +106,16 @@ export default function Login() {
             disabled={loading}
             className="border px-4 py-2 rounded-lg"
           />
+
+          {/* 🔵 ŞİFREMİ UNUTTUM */}
+          <div className="text-right text-sm">
+            <Link
+              to="/forgot-password"
+              className="text-blue-600 hover:underline"
+            >
+              Şifremi unuttum?
+            </Link>
+          </div>
 
           <button
             type="submit"

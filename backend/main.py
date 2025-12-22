@@ -1,10 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.utils import get_openapi
 from sqlalchemy import text
 
 from db.connection import engine, SessionLocal, Base
 
-# 🔥 MODELLERİ BURADA IMPORT ET (ÇOK ÖNEMLİ)
+# 🔥 MODELLER
 from models.user import User
 from models.workspace import Workspace
 from models.project import Project
@@ -19,10 +20,45 @@ from routers.task_router import router as task_router
 from routers.invite_router import router as invite_router
 from routers.invite_signup_router import router as invite_signup_router
 
+
 app = FastAPI(title="ClickUp Clone API")
 
 # -------------------------------------------------
-# ✅ CORS (EN ÜSTE)
+# 🔐 SWAGGER AUTH (AUTHORIZE BUTONU)
+# -------------------------------------------------
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    openapi_schema = get_openapi(
+        title="ClickUp Clone API",
+        version="0.1.0",
+        description="API with JWT authentication",
+        routes=app.routes,
+    )
+
+    openapi_schema["components"]["securitySchemes"] = {
+        "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT",
+        }
+    }
+
+    openapi_schema["security"] = [
+        {
+            "BearerAuth": []
+        }
+    ]
+
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+app.openapi = custom_openapi
+
+# -------------------------------------------------
+# ✅ CORS
 # -------------------------------------------------
 app.add_middleware(
     CORSMiddleware,
@@ -36,9 +72,7 @@ app.add_middleware(
 )
 
 # -------------------------------------------------
-# ✅ STARTUP EVENT (TEK VE DOĞRU create_all)
-# -------------------------------------------------
-
+# ROUTERS
 # -------------------------------------------------
 app.include_router(auth_router)
 app.include_router(workspace_router)

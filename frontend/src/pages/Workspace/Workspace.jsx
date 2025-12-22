@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Sidebar from "./components/Sidebar";
 import TopBar from "./components/TopBar";
 import InviteModal from "./components/InviteModal";
+import SettingsPanel from "../SettingsPanel";
+
 
 export default function Workspace() {
   const { workspaceId } = useParams();
@@ -12,6 +14,9 @@ export default function Workspace() {
   const [openInvite, setOpenInvite] = useState(false);
   const [workspaceName, setWorkspaceName] = useState("");
 
+  // 🔥 SAĞ PANEL KONTROLÜ
+  const [activePanel, setActivePanel] = useState("content");
+
   // 🔐 Auth kontrolü
   useEffect(() => {
     if (!localStorage.getItem("token")) {
@@ -19,7 +24,7 @@ export default function Workspace() {
     }
   }, [navigate]);
 
-  // 🔥 Workspace adını backend’den çek (fetch)
+  // 🔥 Workspace adını backend’den çek
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -50,12 +55,18 @@ export default function Workspace() {
           localStorage.removeItem("token");
           navigate("/login");
         }}
+        setActivePanel={setActivePanel} // 🔥 EKLENDİ
       />
 
       {/* Ana İçerik */}
       <main className="flex-1 p-8">
         <TopBar workspaceId={workspaceId} />
-        <Outlet />
+
+        {activePanel === "settings" ? (
+          <SettingsPanel />
+        ) : (
+          <Outlet />
+        )}
       </main>
 
       {/* Invite Modal */}

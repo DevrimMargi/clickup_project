@@ -11,6 +11,10 @@ import InviteSignup from "../pages/InviteSignup";
 // Workspace Layout
 import Workspace from "../pages/Workspace/Workspace";
 import MembersPage from "../pages/Workspace/MembersPage";
+import ForgotPassword from "../pages/ForgotPassword";
+import ResetPassword from "../pages/ResetPassword";
+
+
 
 // Workspace Inner Pages
 import Dashboard from "../pages/Dashboard";
@@ -27,12 +31,17 @@ export default function AppRouter() {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+
+
 
         {/* Davet linki → Signup */}
         <Route
           path="/accept-invite/:token"
           element={<InviteSignup />}
         />
+        
 
         {/* ========== WORKSPACE ROUTES ========== */}
         <Route path="/workspace/:workspaceId" element={<Workspace />}>

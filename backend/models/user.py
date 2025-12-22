@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from sqlalchemy.orm import relationship
+from datetime import datetime
 from db.connection import Base
 
 
@@ -11,6 +12,10 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     password_hash = Column(String, nullable=False)
     is_admin = Column(Boolean, default=False)
+
+    # 🔐 Şifre sıfırlama alanları
+    password_reset_token = Column(String, nullable=True)
+    password_reset_expires = Column(DateTime, nullable=True)
 
     # 🔗 Workspace üyelikleri (member / admin rolü)
     user_workspaces = relationship(

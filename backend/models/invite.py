@@ -10,5 +10,7 @@ class Invite(Base):
     token = Column(String, unique=True, index=True, nullable=False)
     workspace_id = Column(Integer, ForeignKey("workspaces.id"), nullable=False)
     accepted = Column(Boolean, default=False)
+    role = Column(String, default="Member")
+
 
     workspace = relationship("Workspace")
