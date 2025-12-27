@@ -11,122 +11,123 @@ import {
 } from "lucide-react";
 
 export default function Dashboard() {
-  // Bugünün tarihini şık bir formatta alalım
   const today = new Date().toLocaleDateString('tr-TR', { 
     day: 'numeric', month: 'long', year: 'numeric' 
   });
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-200 p-6 md:p-10">
+    <div className="min-h-screen bg-[#020617] text-slate-400 p-6 md:p-10">
       
       {/* HEADER BÖLÜMÜ */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
         <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-            Hoş geldin, Devrim! <span className="animate-bounce">👋</span>
+          <h1 className="text-4xl font-black text-white tracking-tight flex items-center gap-4">
+            Hoş geldin <span className="animate-bounce">👋</span>
           </h1>
-          <p className="text-slate-400 mt-1 flex items-center gap-2">
-            <LayoutDashboard className="w-4 h-4" />
-            Workspace kontrol panelindesin • <span className="text-indigo-400">{today}</span>
+          <p className="text-slate-400 mt-2 flex items-center gap-3 text-lg font-medium">
+            <LayoutDashboard className="w-5 h-5 text-indigo-400" />
+            Workspace kontrol panelindesin • <span className="text-indigo-400 font-bold">{today}</span>
           </p>
         </div>
 
         {/* HIZLI AKSİYONLAR */}
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-semibold transition-all shadow-lg shadow-indigo-600/20 active:scale-95">
-            <Plus className="w-5 h-5" />
-            <span className="hidden sm:inline">Görev Oluştur</span>
+        <div className="flex items-center gap-4">
+          <button className="flex items-center gap-3 px-6 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-bold text-lg transition-all shadow-lg shadow-indigo-500/20 active:scale-95">
+            <Plus className="w-6 h-6" />
+            <span>Görev Oluştur</span>
           </button>
-          <button className="p-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl transition-all">
-            <Settings className="w-5 h-5 text-slate-400" />
+          <button className="p-3.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-2xl transition-all group">
+            <Settings className="w-6 h-6 text-slate-400 group-hover:rotate-90 transition-transform duration-300" />
           </button>
         </div>
       </div>
 
       {/* ÖZET İSTATİSTİK KARTLARI */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <StatCard icon={<Target className="text-blue-400" />} label="Aktif Projeler" value="12" trend="+2 bu hafta" />
-        <StatCard icon={<CheckSquare className="text-emerald-400" />} label="Biten Görevler" value="48" trend="%12 artış" />
-        <StatCard icon={<Users className="text-purple-400" />} label="Takım Üyeleri" value="8" trend="3 yeni" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+        <StatCard icon={<Target size={28} />} label="Aktif Projeler" value="12" trend="+2 bu hafta" type="blue" />
+        <StatCard icon={<CheckSquare size={28} />} label="Biten Görevler" value="48" trend="%12 artış" type="emerald" />
+        <StatCard icon={<Users size={28} />} label="Takım Üyeleri" value="8" trend="3 yeni" type="purple" />
       </div>
 
       {/* ANA ÖZELLİK KARTLARI */}
-      <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-6 ml-1">Hızlı Menü</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        {/* Görev Yönetimi Kartı */}
-        <div className="group relative">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl blur opacity-10 group-hover:opacity-25 transition"></div>
-          <div className="relative bg-slate-900/50 border border-white/5 p-8 rounded-2xl hover:border-blue-500/50 transition-all cursor-pointer overflow-hidden">
-            <div className="p-3 bg-blue-500/10 rounded-xl w-fit mb-6 text-blue-400">
-              <Zap className="w-6 h-6" />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2 flex items-center justify-between">
-              Görev Yönetimi
-              <ArrowUpRight className="w-5 h-5 text-slate-600 group-hover:text-blue-400 transition" />
-            </h3>
-            <p className="text-slate-400 text-sm leading-relaxed">
-              Takımının iş akışını organize et, öncelikleri belirle ve ilerlemeyi takip et.
-            </p>
-          </div>
-        </div>
+      <div className="flex items-center gap-3 mb-8 ml-1">
+        <div className="h-1 w-8 bg-indigo-500 rounded-full"></div>
+        <h2 className="text-sm font-black text-slate-500 uppercase tracking-[0.3em]">Hızlı Menü</h2>
+      </div>
 
-        {/* Takım Yönetimi Kartı */}
-        <div className="group relative">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl blur opacity-10 group-hover:opacity-25 transition"></div>
-          <div className="relative bg-slate-900/50 border border-white/5 p-8 rounded-2xl hover:border-purple-500/50 transition-all cursor-pointer">
-            <div className="p-3 bg-purple-500/10 rounded-xl w-fit mb-6 text-purple-400">
-              <UserPlus className="w-6 h-6" />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2 flex items-center justify-between">
-              Ekipler ve Davetler
-              <ArrowUpRight className="w-5 h-5 text-slate-600 group-hover:text-purple-400 transition" />
-            </h3>
-            <p className="text-slate-400 text-sm leading-relaxed">
-              Yeni yetenekleri davet et, rollerini belirle ve departmanları oluştur.
-            </p>
-          </div>
-        </div>
-
-        {/* Workspace Ayarları Kartı */}
-        <div className="group relative">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl blur opacity-10 group-hover:opacity-25 transition"></div>
-          <div className="relative bg-slate-900/50 border border-white/5 p-8 rounded-2xl hover:border-amber-500/50 transition-all cursor-pointer">
-            <div className="p-3 bg-amber-500/10 rounded-xl w-fit mb-6 text-amber-400">
-              <Settings className="w-6 h-6" />
-            </div>
-            <h3 className="text-xl font-bold text-white mb-2 flex items-center justify-between">
-              Workspace Yapılandırma
-              <ArrowUpRight className="w-5 h-5 text-slate-600 group-hover:text-amber-400 transition" />
-            </h3>
-            <p className="text-slate-400 text-sm leading-relaxed">
-              Logoyu değiştir, genel tercihleri yönet ve güvenlik politikalarını ayarla.
-            </p>
-          </div>
-        </div>
-
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <MenuCard 
+          icon={<Zap className="w-8 h-8" />} 
+          title="Görev Yönetimi" 
+          description="Takımının iş akışını organize et, öncelikleri belirle ve ilerlemeyi takip et."
+          color="blue"
+        />
+        <MenuCard 
+          icon={<UserPlus className="w-8 h-8" />} 
+          title="Ekipler ve Davetler" 
+          description="Yeni yetenekleri davet et, rollerini belirle ve departmanları oluştur."
+          color="purple"
+        />
+        <MenuCard 
+          icon={<Settings className="w-8 h-8" />} 
+          title="Sistem Ayarları" 
+          description="Logoyu değiştir, genel tercihleri yönet ve güvenlik politikalarını ayarla."
+          color="amber"
+        />
       </div>
     </div>
   );
 }
 
-// Küçük Yardımcı Bileşen: İstatistik Kartı
-function StatCard({ icon, label, value, trend }) {
+function StatCard({ icon, label, value, trend, type }) {
+  const themes = {
+    blue: "text-blue-400 bg-blue-500/5 border-blue-500/10",
+    emerald: "text-emerald-400 bg-emerald-500/5 border-emerald-500/10",
+    purple: "text-purple-400 bg-purple-500/5 border-purple-500/10"
+  };
+
   return (
-    <div className="bg-slate-900/40 border border-white/5 p-6 rounded-2xl hover:bg-slate-900/60 transition-colors shadow-sm">
-      <div className="flex items-center gap-4">
-        <div className="p-3 bg-white/5 rounded-xl border border-white/5">
+    <div className="bg-slate-900/50 border border-slate-800 p-8 rounded-[2.5rem] hover:border-slate-700 transition-all group">
+      <div className="flex items-center gap-6">
+        <div className={`p-4 rounded-2xl border ${themes[type]} group-hover:scale-110 transition-transform`}>
           {icon}
         </div>
         <div>
-          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">{label}</p>
-          <div className="flex items-baseline gap-3">
-            <span className="text-2xl font-bold text-white leading-none mt-1">{value}</span>
-            <span className="text-[10px] font-medium text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full uppercase tracking-tighter">
+          <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">{label}</p>
+          <div className="flex items-baseline gap-4">
+            <span className="text-4xl font-black text-white">{value}</span>
+            <span className={`text-xs font-bold px-2.5 py-1 rounded-lg bg-slate-800 ${themes[type].split(' ')[0]}`}>
               {trend}
             </span>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function MenuCard({ icon, title, description, color }) {
+  const colors = {
+    blue: "from-blue-500/20 to-transparent border-blue-500/20 text-blue-400",
+    purple: "from-purple-500/20 to-transparent border-purple-500/20 text-purple-400",
+    amber: "from-amber-500/20 to-transparent border-amber-500/20 text-amber-400"
+  };
+
+  return (
+    <div className={`group relative bg-slate-900 border border-slate-800 p-10 rounded-[3rem] transition-all hover:-translate-y-2 hover:shadow-2xl hover:shadow-black`}>
+      <div className={`absolute inset-0 bg-gradient-to-br ${colors[color]} opacity-0 group-hover:opacity-100 transition-opacity rounded-[3rem]`} />
+      
+      <div className="relative z-10">
+        <div className={`p-4 bg-slate-800 rounded-2xl w-fit mb-8 shadow-inner ${colors[color].split(' ').pop()}`}>
+          {icon}
+        </div>
+        <h3 className="text-2xl font-black text-white mb-4 flex items-center justify-between">
+          {title}
+          <ArrowUpRight className="w-6 h-6 text-slate-600 group-hover:text-white transition-colors" />
+        </h3>
+        <p className="text-slate-400 text-lg leading-relaxed font-medium">
+          {description}
+        </p>
       </div>
     </div>
   );
